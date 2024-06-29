@@ -1,0 +1,21 @@
+<resources>
+    <string name="app_name">GDSaveEditor</string>
+    <string name="editor">编辑</string>
+    <string name="permission_tips">欢迎使用本APP！！!\n放心，本APP不会联网！！\n请先授予管理文件权限，以便读取存档文件\n</string>
+    <string name="settings">设置</string>
+    <string name="join_qq_group">加入QQ交流群</string>
+    <string name="please_input_skill_name">请输入技能名称：</string>
+    <string name="lv8_skill_name">请输入LV8技能名称</string>
+    <string name="lv7_skill_name">请输入LV7技能名称</string>
+    <string name="lv6_skill_name">请输入LV6技能名称</string>
+    <string name="lv5_skill_name">请输入LV5技能名称</string>
+    <string name="lv4_skill_name">请输入LV4技能名称</string>
+    <string name="lv3_skill_name">请输入LV3技能名称</string>
+    <string name="lv2_skill_name">请输入LV2技能名称</string>
+    <string name="lv1_skill_name">请输入LV1技能名称</string>
+    <string name="replace_skills">替换技能</string>
+    <string name="edit_wujiang">编辑武将</string>
+    <string name="edit_city">编辑城市</string>
+    <string name="edit_daoju">编辑道具</string>
+    <string name="github">查看项目</string>
+</resources>
