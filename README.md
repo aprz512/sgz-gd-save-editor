@@ -4,7 +4,9 @@
 霸王的大陆GD版存档技能修改。
 
 ## 操作文档
-请看文档：[技能修改操作步骤](/doc/技能修改操作步骤.md)
+如果使用的是Android 版，请直接使用[GDSaveEditor](https://github.com/aprz512/sgz-gd-save-editor/releases)，安装APK即可修改。
+
+硬核方式，请看文档：[技能修改操作步骤](/doc/技能修改操作步骤.md)
 
 ## 交流群
 <img src="imgs/qrcode_1719229785519.jpg" height="300"/>
