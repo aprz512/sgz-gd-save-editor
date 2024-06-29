@@ -43,6 +43,9 @@ class SettingsFragment : Fragment() {
             val intent = Intent(Intent.ACTION_VIEW, uri)
             startActivity(intent)
         }
+        binding.buttonVersion.setOnClickListener {
+            Toast.makeText(context, BuildConfig.VERSION_NAME, Toast.LENGTH_SHORT).show()
+        }
     }
 
     override fun onDestroyView() {
