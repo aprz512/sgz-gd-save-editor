@@ -1,5 +1,6 @@
 package com.aprz.gdsaveeditor
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
 import android.os.Environment
@@ -50,6 +51,7 @@ class EditorListFragment : Fragment() {
         queryFiles()
     }
 
+    @SuppressLint("DefaultLocale")
     private fun queryFiles() {
         if (isQuerying) {
             return
@@ -63,7 +65,13 @@ class EditorListFragment : Fragment() {
 //                    regex.matches(it.nameWithoutExtension)
                     it.name.endsWith(".sav")
                 }
-                .toList().sorted()
+                .toList().sortedBy {
+                    if (regex.matches(it.nameWithoutExtension)) {
+                        String.format("%02d", it.nameWithoutExtension.toInt())
+                    } else {
+                        it.nameWithoutExtension
+                    }
+                }
             mainHandler.post {
                 binding.srlPullToRefresh.isRefreshing = false
                 showList(fileList)
