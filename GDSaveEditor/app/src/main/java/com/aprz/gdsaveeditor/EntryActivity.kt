@@ -1,13 +1,16 @@
 package com.aprz.gdsaveeditor
 
+import android.Manifest
+import android.Manifest.permission
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.provider.Settings
-import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
 import com.aprz.gdsaveeditor.databinding.ActivityEntryBinding
 
 class EntryActivity : AppCompatActivity() {
@@ -25,15 +28,29 @@ class EntryActivity : AppCompatActivity() {
             }
         }
 
-        binding.materialSwitch.visibility = View.GONE
-
         checkPermission()
     }
 
-    private fun checkPermission() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && !Environment.isExternalStorageManager()) {
-            binding.materialSwitch.visibility = View.VISIBLE
+    private fun hasStoragePermission(): Boolean {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            Environment.isExternalStorageManager()
         } else {
+            val write = ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE
+            ) == PackageManager.PERMISSION_GRANTED
+            val read = ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE
+            ) == PackageManager.PERMISSION_GRANTED
+            return write and read
+        }
+    }
+
+    private fun checkPermission() {
+        val hasPermission = hasStoragePermission()
+        binding.materialSwitch.isChecked = hasPermission
+        if (hasPermission) {
             navigateMainActivity()
         }
     }
@@ -43,6 +60,15 @@ class EntryActivity : AppCompatActivity() {
             val intent = Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION)
             intent.setData(Uri.parse("package:" + this.packageName))
             startActivity(intent)
+        } else {
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(
+                    permission.READ_EXTERNAL_STORAGE,
+                    permission.WRITE_EXTERNAL_STORAGE
+                ),
+                0
+            )
         }
     }
 
