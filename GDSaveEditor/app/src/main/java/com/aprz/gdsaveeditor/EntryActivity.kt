@@ -19,8 +19,10 @@ class EntryActivity : AppCompatActivity() {
         binding = ActivityEntryBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        binding.materialSwitch.setOnClickListener {
-            requestFileManagePermission()
+        binding.materialSwitch.setOnCheckedChangeListener { _, isChecked ->
+            if (isChecked) {
+                requestFileManagePermission()
+            }
         }
 
         binding.materialSwitch.visibility = View.GONE
