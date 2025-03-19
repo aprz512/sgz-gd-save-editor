@@ -5,14 +5,14 @@ plugins {
 
 android {
     namespace = "com.aprz.gdsaveeditor"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.aprz.gdsaveeditor"
         minSdk = 24
-        targetSdk = 34
-        versionCode = 3
-        versionName = "1.0.2.0629"
+        targetSdk = 35
+        versionCode = 103
+        versionName = "1.0.3.20250319"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
