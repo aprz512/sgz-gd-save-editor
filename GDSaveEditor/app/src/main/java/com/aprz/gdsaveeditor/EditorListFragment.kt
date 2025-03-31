@@ -2,6 +2,7 @@ package com.aprz.gdsaveeditor
 
 import android.annotation.SuppressLint
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
 import android.os.Handler
@@ -9,10 +10,17 @@ import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.result.ActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.RecyclerView
+import androidx.transition.Visibility
 import com.aprz.gdsaveeditor.databinding.FragmentEditorListBinding
 import com.aprz.gdsaveeditor.databinding.ItemEditorListBinding
+import com.aprz.gdsaveeditor.document.DirectoryFragmentViewModel
 import java.io.File
 import kotlin.concurrent.thread
 
@@ -28,6 +36,20 @@ class EditorListFragment : Fragment() {
     // onDestroyView.
     private val binding get() = _binding!!
     private val mainHandler = Handler(Looper.getMainLooper())
+    private val viewModel: DirectoryFragmentViewModel by viewModels()
+
+
+
+    private val openDocumentTreeLauncher =
+        registerForActivityResult(ActivityResultContracts.OpenDocumentTree()) { uri ->
+            uri ?: return@registerForActivityResult
+            context?.contentResolver?.takePersistableUriPermission(
+                uri,
+                Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+            )
+            showDirectoryContents(uri)
+        }
+
 
     @Volatile
     private var isQuerying = false
@@ -43,12 +65,37 @@ class EditorListFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        binding.srlPullToRefresh.isRefreshing = true
-        binding.srlPullToRefresh.setOnRefreshListener {
-            queryFiles()
-        }
+//        binding.srlPullToRefresh.isRefreshing = true
+//        binding.srlPullToRefresh.setOnRefreshListener {
+//            queryFiles()
+//        }
+//
+//        queryFiles()
+        showOpenDocumentTreeButton()
 
-        queryFiles()
+        observerDocument()
+    }
+
+    private fun observerDocument() {
+        viewModel.documents.observe(viewLifecycleOwner, Observer { documents ->
+            documents?.let {
+                adapter.setEntries(documents)
+
+            }
+        })
+    }
+
+    private fun showOpenDocumentTreeButton() {
+        binding.openDocumentTree.visibility = View.VISIBLE
+        binding.srlPullToRefresh.visibility = View.INVISIBLE
+
+        binding.openDocumentTree.setOnClickListener {
+            openDirectory()
+        }
+    }
+
+    private fun openDirectory() {
+        openDocumentTreeLauncher.launch(null)
     }
 
     @SuppressLint("DefaultLocale")
@@ -88,6 +135,13 @@ class EditorListFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    private fun showDirectoryContents(uri: Uri) {
+        binding.openDocumentTree.visibility = View.INVISIBLE
+        binding.srlPullToRefresh.visibility = View.VISIBLE
+
+        viewModel.loadDirectory(uri)
     }
 }
 

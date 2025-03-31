@@ -19,4 +19,5 @@
     <string name="edit_daoju">编辑道具</string>
     <string name="github">查看项目</string>
     <string name="version">查看版本</string>
+    <string name="open_save">打开存档文件</string>
 </resources>
