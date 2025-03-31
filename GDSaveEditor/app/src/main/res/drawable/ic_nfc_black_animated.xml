@@ -1,0 +1,56 @@
+<animated-vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:drawable="@drawable/ic_nfc_opt_black_64dp">
+
+    <target android:name="outline">
+        <aapt:attr name="android:animation">
+            <objectAnimator
+                android:duration="1200"
+                android:interpolator="@android:anim/accelerate_decelerate_interpolator"
+                android:propertyName="trimPathEnd"
+                android:repeatMode="restart"
+                android:valueFrom="0"
+                android:valueTo="1"
+                android:valueType="floatType" />
+        </aapt:attr>
+    </target>
+
+    <target android:name="innerLine">
+        <aapt:attr name="android:animation">
+            <objectAnimator
+                android:duration="1200"
+                android:interpolator="@android:anim/accelerate_decelerate_interpolator"
+                android:propertyName="trimPathEnd"
+                android:repeatMode="restart"
+                android:valueFrom="0"
+                android:valueTo="1"
+                android:valueType="floatType" />
+        </aapt:attr>
+    </target>
+
+    <target android:name="dot">
+        <aapt:attr name="android:animation">
+            <set>
+                <objectAnimator
+                    android:duration="800"
+                    android:interpolator="@android:anim/bounce_interpolator"
+                    android:propertyName="scaleX"
+                    android:repeatCount="-1"
+                    android:repeatMode="reverse"
+                    android:valueFrom="0.8"
+                    android:valueTo="1.2"
+                    android:valueType="floatType" />
+                <objectAnimator
+                    android:duration="800"
+                    android:interpolator="@android:anim/bounce_interpolator"
+                    android:propertyName="scaleY"
+                    android:repeatCount="-1"
+                    android:repeatMode="reverse"
+                    android:valueFrom="0.8"
+                    android:valueTo="1.2"
+                    android:valueType="floatType" />
+            </set>
+        </aapt:attr>
+    </target>
+
+</animated-vector>

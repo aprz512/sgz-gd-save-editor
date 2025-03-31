@@ -1,28 +1,22 @@
 package com.aprz.gdsaveeditor
 
-import android.annotation.SuppressLint
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.os.Environment
-import android.os.Handler
-import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import androidx.transition.Visibility
 import com.aprz.gdsaveeditor.databinding.FragmentEditorListBinding
 import com.aprz.gdsaveeditor.databinding.ItemEditorListBinding
+import com.aprz.gdsaveeditor.document.CachingDocumentFile
 import com.aprz.gdsaveeditor.document.DirectoryFragmentViewModel
-import java.io.File
-import kotlin.concurrent.thread
 
 
 /**
@@ -35,10 +29,9 @@ class EditorListFragment : Fragment() {
     // This property is only valid between onCreateView and
     // onDestroyView.
     private val binding get() = _binding!!
-    private val mainHandler = Handler(Looper.getMainLooper())
     private val viewModel: DirectoryFragmentViewModel by viewModels()
-
-
+    private val adapter: EditorListAdapter = EditorListAdapter()
+    private var cacheUri: Uri? = null
 
     private val openDocumentTreeLauncher =
         registerForActivityResult(ActivityResultContracts.OpenDocumentTree()) { uri ->
@@ -48,11 +41,9 @@ class EditorListFragment : Fragment() {
                 Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
             )
             showDirectoryContents(uri)
+            this.cacheUri = uri
         }
 
-
-    @Volatile
-    private var isQuerying = false
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -65,12 +56,15 @@ class EditorListFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-//        binding.srlPullToRefresh.isRefreshing = true
-//        binding.srlPullToRefresh.setOnRefreshListener {
-//            queryFiles()
-//        }
-//
-//        queryFiles()
+        binding.srlPullToRefresh.isRefreshing = true
+        binding.srlPullToRefresh.setOnRefreshListener {
+            if (cacheUri == null) {
+                openDirectory()
+            } else {
+                showDirectoryContents(cacheUri!!)
+            }
+        }
+
         showOpenDocumentTreeButton()
 
         observerDocument()
@@ -79,8 +73,7 @@ class EditorListFragment : Fragment() {
     private fun observerDocument() {
         viewModel.documents.observe(viewLifecycleOwner, Observer { documents ->
             documents?.let {
-                adapter.setEntries(documents)
-
+                adapter.submitList(documents)
             }
         })
     }
@@ -98,40 +91,6 @@ class EditorListFragment : Fragment() {
         openDocumentTreeLauncher.launch(null)
     }
 
-    @SuppressLint("DefaultLocale")
-    private fun queryFiles() {
-        if (isQuerying) {
-            return
-        }
-        isQuerying = true
-        thread {
-            val rootFile = File("${Environment.getExternalStorageDirectory()}/sgz/save")
-            val regex = Regex("\\d+")
-            val fileList = rootFile.walk()
-                .filter {
-//                    regex.matches(it.nameWithoutExtension)
-                    it.name.endsWith(".sav")
-                }
-                .toList().sortedBy {
-                    if (regex.matches(it.nameWithoutExtension)) {
-                        String.format("%02d", it.nameWithoutExtension.toInt())
-                    } else {
-                        it.nameWithoutExtension
-                    }
-                }
-            mainHandler.post {
-                binding.srlPullToRefresh.isRefreshing = false
-                showList(fileList)
-            }
-            isQuerying = false
-        }
-    }
-
-    private fun showList(files: List<File>) {
-        binding.rvList.adapter = EditorListAdapter(files)
-    }
-
-
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
@@ -145,8 +104,23 @@ class EditorListFragment : Fragment() {
     }
 }
 
-class EditorListAdapter(private val list: List<File>) :
-    RecyclerView.Adapter<EditorListAdapter.MyViewHolder>() {
+class EditorListAdapter() :
+    ListAdapter<CachingDocumentFile, MyViewHolder>(object :
+        DiffUtil.ItemCallback<CachingDocumentFile>() {
+        override fun areItemsTheSame(
+            oldItem: CachingDocumentFile,
+            newItem: CachingDocumentFile
+        ): Boolean {
+            return oldItem == newItem
+        }
+
+        override fun areContentsTheSame(
+            oldItem: CachingDocumentFile,
+            newItem: CachingDocumentFile
+        ): Boolean {
+            return oldItem.uri == newItem.uri
+        }
+    }) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MyViewHolder {
         val binding =
@@ -156,23 +130,19 @@ class EditorListAdapter(private val list: List<File>) :
     }
 
     override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
-        holder.bind(list[position])
+        holder.bind(getItem(position))
     }
+}
 
-    override fun getItemCount(): Int {
-        return list.size
-    }
-
-    inner class MyViewHolder(private val binding: ItemEditorListBinding) :
-        RecyclerView.ViewHolder(binding.root) {
-        fun bind(file: File) {
-            binding.tvFileName.text = file.name
-            binding.root.setOnClickListener {
-                binding.root.context.apply {
-                    startActivity(Intent(this, EditorActivity::class.java).apply {
-                        putExtra("path", file.absolutePath)
-                    })
-                }
+class MyViewHolder(private val binding: ItemEditorListBinding) :
+    RecyclerView.ViewHolder(binding.root) {
+    fun bind(file: CachingDocumentFile) {
+        binding.tvFileName.text = file.name
+        binding.root.setOnClickListener {
+            binding.root.context.apply {
+                startActivity(Intent(this, EditorActivity::class.java).apply {
+                    putExtra("uri", file.uri)
+                })
             }
         }
     }

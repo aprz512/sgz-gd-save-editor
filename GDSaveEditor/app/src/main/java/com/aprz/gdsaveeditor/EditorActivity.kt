@@ -1,9 +1,10 @@
 package com.aprz.gdsaveeditor
 
+import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.text.TextUtils
+import android.os.ParcelFileDescriptor
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -14,8 +15,10 @@ import com.aprz.gdsaveeditor.databinding.ActivityEditorBinding
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
+import java.io.BufferedReader
 import java.io.BufferedWriter
 import java.io.File
+import java.io.FileReader
 import java.io.FileWriter
 import kotlin.concurrent.thread
 
@@ -55,8 +58,8 @@ class EditorActivity : AppCompatActivity() {
     private fun loadSkills() {
         loading.show()
         thread {
-            val filePath = intent.getStringExtra("path") ?: return@thread
-            val jsonObject = getFileAsJsonObject(filePath)
+            val fileUri = intent.getParcelableExtra<Uri>("uri") ?: return@thread
+            val jsonObject = getFileAsJsonObject(fileUri) ?: return@thread
             val actors = jsonObject.get("actors") as JsonArray
             val diySkills = actors.filter {
                 val item = it.asJsonObject
@@ -86,15 +89,11 @@ class EditorActivity : AppCompatActivity() {
     private fun replaceSkills() {
         loading.show()
         thread {
-            val filePath = intent.getStringExtra("path")
-            if (TextUtils.isEmpty(filePath)) {
-                loading.dismiss()
-                return@thread
-            }
-            val jsonObject = getFileAsJsonObject(filePath!!)
+            val fileUri = intent.getParcelableExtra<Uri>("uri") ?: return@thread
+            val jsonObject = getFileAsJsonObject(fileUri) ?: return@thread
             Handler(Looper.getMainLooper()).post {
                 loading.dismiss()
-                saveSkill(jsonObject, filePath)
+                saveSkill(jsonObject, fileUri)
             }
         }
     }
@@ -112,23 +111,27 @@ class EditorActivity : AppCompatActivity() {
         )
     }
 
-    private fun saveSkill(jsonObject: JsonObject, filePath: String) {
+    private fun saveSkill(jsonObject: JsonObject, fileUri: Uri) {
         val actors = jsonObject.get("actors") as JsonArray
         val actor = actors.filter {
             val item = it.asJsonObject
             item.has("diy_skills")
         }[0]
         actor.asJsonObject.addProperty("diy_skills", DiySkills.getEncryptSkillString(getSkills()))
-        bakSaveFile(filePath)
-        patchSaveFile(filePath, jsonObject.toString())
+        patchSaveFile(fileUri, jsonObject.toString())
         Toast.makeText(this, "替换完成", Toast.LENGTH_SHORT).show()
     }
 
-    private fun patchSaveFile(filePath: String, save: String) {
-        val saveFile = File(filePath)
-        val fis = BufferedWriter(FileWriter(saveFile))
-        fis.write(save)
-        fis.close()
+    private fun patchSaveFile(fileUri: Uri, save: String) {
+        val pfd: ParcelFileDescriptor = contentResolver.openFileDescriptor(fileUri, "w") ?: return
+        pfd.use out@{ pfd ->
+            val bw = BufferedWriter(FileWriter(pfd.fileDescriptor))
+            bw.use inner@{ bw ->
+                bw.write(save)
+                return@inner
+            }
+            return@out
+        }
     }
 
     private fun bakSaveFile(filePath: String) {
@@ -136,13 +139,17 @@ class EditorActivity : AppCompatActivity() {
         saveFile.renameTo(File(saveFile.name.plus(".bak")))
     }
 
-    private fun getFileAsJsonObject(fileName: String): JsonObject {
-        val file = File(fileName)
-        val json = StringBuilder()
-        file.readLines().forEach {
-            json.append(it)
+    private fun getFileAsJsonObject(fileUri: Uri): JsonObject? {
+        return contentResolver.openFileDescriptor(fileUri, "r")?.use { pfd ->
+            val bw = BufferedReader(FileReader(pfd.fileDescriptor))
+            bw.use inner@{ bw ->
+                val json = StringBuilder()
+                bw.readLines().forEach { line ->
+                    json.append(line)
+                }
+                return JsonParser.parseString(json.toString()).asJsonObject
+            }
         }
-        return JsonParser.parseString(json.toString()).asJsonObject
     }
 
 }
