@@ -55,15 +55,16 @@ class EditorListFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
         binding.srlPullToRefresh.isRefreshing = true
         binding.srlPullToRefresh.setOnRefreshListener {
             if (cacheUri == null) {
+                binding.srlPullToRefresh.isRefreshing = false
                 openDirectory()
             } else {
                 showDirectoryContents(cacheUri!!)
             }
         }
+        binding.rvList.adapter = adapter
 
         showOpenDocumentTreeButton()
 
@@ -73,6 +74,7 @@ class EditorListFragment : Fragment() {
     private fun observerDocument() {
         viewModel.documents.observe(viewLifecycleOwner, Observer { documents ->
             documents?.let {
+                binding.srlPullToRefresh.isRefreshing = false
                 adapter.submitList(documents)
             }
         })

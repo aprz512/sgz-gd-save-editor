@@ -15,23 +15,21 @@ class DirectoryFragmentViewModel(application: Application) : AndroidViewModel(ap
     val documents = _documents
 
     fun loadDirectory(directoryUri: Uri) {
-        val documentsTree = DocumentFile.fromTreeUri(getApplication(), directoryUri) ?: return
-        val childDocuments = documentsTree.listFiles().toCachingList()
+        viewModelScope.launch(context = Dispatchers.IO) {
+            val documentsTree =
+                DocumentFile.fromTreeUri(getApplication(), directoryUri) ?: return@launch
+            val childDocuments = documentsTree.listFiles().toCachingList()
 
-        // It's much nicer when the documents are sorted by something, so we'll sort the documents
-        // we got by name. Unfortunate there may be quite a few documents, and sorting can take
-        // some time, so we'll take advantage of coroutines to take this work off the main thread.
-        viewModelScope.launch {
-            val sortedDocuments = withContext(Dispatchers.IO) {
-                childDocuments.toMutableList()
-                    .filter {
-                        it.name?.endsWith(".sav") == true
-                    }
-                    .toList().sortedBy {
-                        it.name?.replace(".sav", "")
-                    }
-            }
-            _documents.postValue(sortedDocuments)
+            // It's much nicer when the documents are sorted by something, so we'll sort the documents
+            // we got by name. Unfortunate there may be quite a few documents, and sorting can take
+            // some time, so we'll take advantage of coroutines to take this work off the main thread.
+            val sortList = childDocuments.toMutableList()
+                .filter {
+                    it.name?.endsWith(".sav") == true
+                }.sortedBy {
+                    it.name?.replace(".sav", "")
+                }
+            _documents.postValue(sortList)
         }
     }
 

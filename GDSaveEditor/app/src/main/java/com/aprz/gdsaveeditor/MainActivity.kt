@@ -72,7 +72,7 @@ class MainActivity : AppCompatActivity() {
             }
         })
 
-        DiySkills.main(arrayOf());
+        binding.viewPager2.isUserInputEnabled = false
     }
 
 
