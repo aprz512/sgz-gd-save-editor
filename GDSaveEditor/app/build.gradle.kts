@@ -11,8 +11,8 @@ android {
         applicationId = "com.aprz.gdsaveeditor"
         minSdk = 24
         targetSdk = 35
-        versionCode = 103
-        versionName = "1.0.3.20250319"
+        versionCode = 104
+        versionName = "1.0.4.20250415"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
