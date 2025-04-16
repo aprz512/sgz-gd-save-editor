@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>三国志·战略版 存档解密测试</title>
+    <!-- 引入 CryptoJS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/aes.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/pad-zeropadding.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/mode-ecb.min.js"></script>
+    <!-- 引入加密解密库 -->
+    <script src="js/combined.js"></script>
+    <style>
+        body {
+            font-family: "Microsoft YaHei", Arial, sans-serif;
+            margin: 20px;
+            line-height: 1.6;
+            color: #333;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #3c4043;
+            text-align: center;
+            border-bottom: 2px solid #4285f4;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #3c4043;
+            margin-top: 20px;
+        }
+        pre {
+            background-color: #f0f0f0;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-family: "Courier New", monospace;
+            border: 1px solid #ddd;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        button {
+            background-color: #4285f4;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: #3367d6;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #e8f0fe;
+            border-radius: 5px;
+            border-left: 5px solid #4285f4;
+        }
+        .test-section {
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px dashed #ccc;
+        }
+        .log-section {
+            margin-top: 20px;
+            background: #000;
+            color: #0f0;
+            padding: 10px;
+            border-radius: 5px;
+            max-height: 200px;
+            overflow-y: auto;
+            font-family: "Courier New", monospace;
+        }
+        .error {
+            color: #f44336;
+        }
+        .success {
+            color: #4caf50;
+        }
+        .hide {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>三国志·战略版 存档解密测试</h1>
+        
+        <div class="test-section">
+            <h2>技能数据解密测试</h2>
+            <div class="form-group">
+                <label for="encryptedData">加密的技能数据：</label>
+                <textarea id="encryptedData" rows="5" style="width: 100%">353039656134666264393838663635333161383436653632336265323163363331313032303065623836656161313664363963616238363564353335613739363032363037646665343666326130663962303563356234633937623239373261353464343235323435646662616561353330383832393564643366373465316361386164643165313365386136666534303465393334316335386162636538366461333438353238633532373937376665613863343963303335643339396135653438383834383863633634303333623533326562366439663434323561356131346138313234633239636432623036613865333135313930313132666336632252ddd14d4b03ee0a8dab8ad8aa8b59e2ac18e8198ddface37139ec62cd54884793ece3916cd223d6da46a92a360e616e9566871ad903875734bb6da5f695d34002</textarea>
+            </div>
+            <button id="decrypt-button">解密</button>
+            <div class="result">
+                <h3>解密结果：</h3>
+                <pre id="decryption-result"></pre>
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h2>技能数据加密测试</h2>
+            <div class="form-group">
+                <label for="skill1">技能1：</label>
+                <input type="text" id="skill1" placeholder="输入技能名称" value="能行军">
+            </div>
+            <div class="form-group">
+                <label for="skill2">技能2：</label>
+                <input type="text" id="skill2" placeholder="输入技能名称" value="霸王">
+            </div>
+            <div class="form-group">
+                <label for="skill3">技能3：</label>
+                <input type="text" id="skill3" placeholder="输入技能名称" value="王佐">
+            </div>
+            <div class="form-group">
+                <label for="skill4">技能4：</label>
+                <input type="text" id="skill4" placeholder="输入技能名称" value="驯性">
+            </div>
+            <div class="form-group">
+                <label for="skill5">技能5：</label>
+                <input type="text" id="skill5" placeholder="输入技能名称" value="深谋">
+            </div>
+            <div class="form-group">
+                <label for="skill6">技能6：</label>
+                <input type="text" id="skill6" placeholder="输入技能名称" value="乱筹">
+            </div>
+            <div class="form-group">
+                <label for="skill7">技能7：</label>
+                <input type="text" id="skill7" placeholder="输入技能名称" value="白刃">
+            </div>
+            <div class="form-group">
+                <label for="skill8">技能8：</label>
+                <input type="text" id="skill8" placeholder="输入技能名称" value="汗血">
+            </div>
+            <button id="encrypt-button">加密</button>
+            <div class="result">
+                <h3>加密结果：</h3>
+                <pre id="encryption-result"></pre>
+            </div>
+            <button id="verification-button" class="hide">验证</button>
+            <div class="result hide" id="verification-section">
+                <h3>验证结果：</h3>
+                <pre id="verification-result"></pre>
+            </div>
+        </div>
+        
+        <div class="log-section">
+            <h3>调试日志：</h3>
+            <div id="log-messages"></div>
+        </div>
+    </div>
+    
+    <script>
+        // 覆盖原始的console.log以在界面上显示日志
+        const originalLog = console.log;
+        const originalError = console.error;
+        const originalWarn = console.warn;
+        
+        console.log = function() {
+            const args = Array.from(arguments);
+            const logElement = document.getElementById('log-messages');
+            const logMessage = document.createElement('div');
+            logMessage.textContent = args.map(arg => typeof arg === 'object' ? 
+                JSON.stringify(arg) : String(arg)).join(' ');
+            logElement.appendChild(logMessage);
+            logElement.scrollTop = logElement.scrollHeight;
+            originalLog.apply(console, arguments);
+        };
+        
+        console.error = function() {
+            const args = Array.from(arguments);
+            const logElement = document.getElementById('log-messages');
+            const logMessage = document.createElement('div');
+            logMessage.textContent = args.map(arg => typeof arg === 'object' ? 
+                JSON.stringify(arg) : String(arg)).join(' ');
+            logMessage.className = 'error';
+            logElement.appendChild(logMessage);
+            logElement.scrollTop = logElement.scrollHeight;
+            originalError.apply(console, arguments);
+        };
+        
+        console.warn = function() {
+            const args = Array.from(arguments);
+            const logElement = document.getElementById('log-messages');
+            const logMessage = document.createElement('div');
+            logMessage.textContent = args.map(arg => typeof arg === 'object' ? 
+                JSON.stringify(arg) : String(arg)).join(' ');
+            logMessage.className = 'warn';
+            logElement.appendChild(logMessage);
+            logElement.scrollTop = logElement.scrollHeight;
+            originalWarn.apply(console, arguments);
+        };
+        
+        document.getElementById('decrypt-button').addEventListener('click', function() {
+            try {
+                console.log('开始解密...');
+                const encryptedData = document.getElementById('encryptedData').value.trim();
+                const decrypted = decryptSkills(encryptedData);
+                console.log('解密成功:', decrypted);
+                
+                document.getElementById('decryption-result').textContent = 
+                    JSON.stringify(decrypted, null, 2);
+                
+                // 填充加密表单
+                document.getElementById('skill1').value = decrypted.skill1 || '';
+                document.getElementById('skill2').value = decrypted.skill2 || '';
+                document.getElementById('skill3').value = decrypted.skill3 || '';
+                document.getElementById('skill4').value = decrypted.skill4 || '';
+                document.getElementById('skill5').value = decrypted.skill5 || '';
+                document.getElementById('skill6').value = decrypted.skill6 || '';
+                document.getElementById('skill7').value = decrypted.skill7 || '';
+                document.getElementById('skill8').value = decrypted.skill8 || '';
+            } catch (error) {
+                console.error('解密失败:', error);
+                document.getElementById('decryption-result').textContent = 
+                    '解密失败: ' + error.message;
+            }
+        });
+        
+        document.getElementById('encrypt-button').addEventListener('click', function() {
+            try {
+                const skills = {
+                    skill1: document.getElementById('skill1').value.trim(),
+                    skill2: document.getElementById('skill2').value.trim(),
+                    skill3: document.getElementById('skill3').value.trim(),
+                    skill4: document.getElementById('skill4').value.trim(),
+                    skill5: document.getElementById('skill5').value.trim(),
+                    skill6: document.getElementById('skill6').value.trim(),
+                    skill7: document.getElementById('skill7').value.trim(),
+                    skill8: document.getElementById('skill8').value.trim()
+                };
+                
+                console.log('开始加密:', skills);
+                const encrypted = encryptSkills(skills);
+                console.log('加密成功');
+                
+                document.getElementById('encryption-result').textContent = encrypted;
+                
+                // 显示验证按钮
+                document.getElementById('verification-button').classList.remove('hide');
+                document.getElementById('verification-section').classList.remove('hide');
+            } catch (error) {
+                console.error('加密失败:', error);
+                document.getElementById('encryption-result').textContent = 
+                    '加密失败: ' + error.message;
+            }
+        });
+        
+        document.getElementById('verification-button').addEventListener('click', function() {
+            try {
+                const encrypted = document.getElementById('encryption-result').textContent.trim();
+                console.log('验证加密结果...');
+                
+                const decrypted = decryptSkills(encrypted);
+                
+                const verificationResult = document.getElementById('verification-result');
+                verificationResult.textContent = JSON.stringify(decrypted, null, 2);
+                
+                // 检查解密结果是否与输入一致
+                const skills = {
+                    skill1: document.getElementById('skill1').value.trim(),
+                    skill2: document.getElementById('skill2').value.trim(),
+                    skill3: document.getElementById('skill3').value.trim(),
+                    skill4: document.getElementById('skill4').value.trim(),
+                    skill5: document.getElementById('skill5').value.trim(),
+                    skill6: document.getElementById('skill6').value.trim(),
+                    skill7: document.getElementById('skill7').value.trim(),
+                    skill8: document.getElementById('skill8').value.trim()
+                };
+                
+                let matches = true;
+                for (const key in skills) {
+                    if (skills[key] !== decrypted[key]) {
+                        matches = false;
+                        break;
+                    }
+                }
+                
+                if (matches) {
+                    console.log('验证成功: 加密解密一致');
+                    const successElement = document.createElement('div');
+                    successElement.className = 'success';
+                    successElement.textContent = '✓ 验证成功：加密解密结果一致';
+                    verificationResult.appendChild(successElement);
+                } else {
+                    console.error('验证失败: 加密解密结果不一致');
+                    const errorElement = document.createElement('div');
+                    errorElement.className = 'error';
+                    errorElement.textContent = '✗ 验证失败：加密解密结果不一致';
+                    verificationResult.appendChild(errorElement);
+                }
+            } catch (error) {
+                console.error('验证失败:', error);
+                document.getElementById('verification-result').textContent = 
+                    '验证失败: ' + error.message;
+            }
+        });
+        
+        // 自动执行一次解密测试
+        window.addEventListener('load', function() {
+            setTimeout(function() {
+                document.getElementById('decrypt-button').click();
+            }, 500);
+        });
+    </script>
+</body>
+</html> 

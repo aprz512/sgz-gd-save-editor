@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>三国志·战略版 存档编辑器</title>
+    <link rel="stylesheet" href="css/style.css">
+    <!-- 引入CryptoJS库 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/aes.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/pad-zeropadding.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/mode-ecb.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>三国志·战略版 存档编辑器</h1>
+        </header>
+        
+        <main>
+            <div class="file-upload">
+                <h2>上传存档文件</h2>
+                <input type="file" id="save-file" accept=".sav,.json" style="display: none;">
+                <button id="load-file">加载文件</button>
+            </div>
+            
+            <div id="editor" style="display: none;">
+                <h2>编辑技能</h2>
+                <div class="skills-container">
+                    <div class="skill-input">
+                        <label for="skill1">技能1：</label>
+                        <input type="text" id="skill1" placeholder="输入技能名称">
+                    </div>
+                    <div class="skill-input">
+                        <label for="skill2">技能2：</label>
+                        <input type="text" id="skill2" placeholder="输入技能名称">
+                    </div>
+                    <div class="skill-input">
+                        <label for="skill3">技能3：</label>
+                        <input type="text" id="skill3" placeholder="输入技能名称">
+                    </div>
+                    <div class="skill-input">
+                        <label for="skill4">技能4：</label>
+                        <input type="text" id="skill4" placeholder="输入技能名称">
+                    </div>
+                    <div class="skill-input">
+                        <label for="skill5">技能5：</label>
+                        <input type="text" id="skill5" placeholder="输入技能名称">
+                    </div>
+                    <div class="skill-input">
+                        <label for="skill6">技能6：</label>
+                        <input type="text" id="skill6" placeholder="输入技能名称">
+                    </div>
+                    <div class="skill-input">
+                        <label for="skill7">技能7：</label>
+                        <input type="text" id="skill7" placeholder="输入技能名称">
+                    </div>
+                    <div class="skill-input">
+                        <label for="skill8">技能8：</label>
+                        <input type="text" id="skill8" placeholder="输入技能名称">
+                    </div>
+                </div>
+                
+                <div class="actions">
+                    <button id="save-changes">保存修改</button>
+                </div>
+            </div>
+            
+            <div id="loading" style="display: none;">
+                <div class="spinner"></div>
+                <p>正在处理...</p>
+            </div>
+        </main>
+        
+        <footer>
+            <p>本工具仅供学习交流使用，请勿用于非法用途</p>
+        </footer>
+    </div>
+    
+    <!-- 加载合并后的JavaScript文件 -->
+    <script src="js/combined.js"></script>
+</body>
+</html> 
