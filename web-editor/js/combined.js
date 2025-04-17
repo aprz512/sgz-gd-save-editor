@@ -10,19 +10,11 @@ const AES_KEY = "gd secret key!!!";
  * 将十六进制字符串解码为字节数组
  */
 function hexToBytes(hexString) {
-  // 确保十六进制字符串是干净的
-  hexString = hexString.replace(/[^0-9a-fA-F]/g, "");
-  
-  // 如果长度是奇数，补0
-  if (hexString.length % 2 !== 0) {
-    hexString = hexString + "0";
+  const bytes = [];
+  for (let c = 0; c < hexString.length; c += 2) {
+    bytes.push(parseInt(hexString.substr(c, 2), 16));
   }
-  
-  const bytes = new Uint8Array(hexString.length / 2);
-  for (let i = 0; i < hexString.length; i += 2) {
-    bytes[i / 2] = parseInt(hexString.substring(i, i + 2), 16);
-  }
-  return bytes;
+  return new Uint8Array(bytes);
 }
 
 /**
@@ -118,24 +110,23 @@ function encryptWithECB(bytes) {
 /**
  * 使用AES ECB模式解密
  */
-function decryptWithECB(bytes) {
-  const key = CryptoJS.enc.Utf8.parse(AES_KEY);
-  const ciphertext = CryptoJS.lib.WordArray.create(Array.from(bytes));
+function decryptWithECB(cipherBytes) {
+  // 将 key 转为字节
+  const keyBytes = aesjs.utils.utf8.toBytes(AES_KEY);
   
-  const decrypted = CryptoJS.AES.decrypt(
-    { ciphertext: ciphertext },
-    key,
-    {
-      mode: CryptoJS.mode.ECB,
-      padding: CryptoJS.pad.ZeroPadding
-    }
-  );
+  // 创建 ECB 解密器
+  const aesEcb = new aesjs.ModeOfOperation.ecb(keyBytes);
   
-  return new Uint8Array(decrypted.sigBytes).map((_, i) => {
-    return (decrypted.words[i >>> 2] >>> (24 - (i % 4) * 8)) & 0xff;
-  });
+  // 解密（返回结果长度与输入相同，包含 0x00 填充）
+  const decryptedPadded = aesEcb.decrypt(cipherBytes);
+  
+  // 去除末尾 0x00
+  let end = decryptedPadded.length;
+  while (end > 0 && decryptedPadded[end - 1] === 0x00) {
+    end--;
+  }
+  return decryptedPadded.slice(0, end);
 }
-
 /**
  * 生成签名（简化版本）
  */
@@ -158,6 +149,8 @@ function decryptSkills(dataHex) {
     // 标准格式处理
     // 十六进制解码
     const bytesData = hexToBytes(dataHex);
+
+    console.log(bytesData);
     
     // 获取签名版本和长度
     const signVersion = bytesData[bytesData.length - 1];
@@ -167,18 +160,36 @@ function decryptSkills(dataHex) {
     
     // 提取技能数据部分
     const skillData = bytesData.slice(0, bytesData.length - signLength - 2);
+
+    console.log('skillData', skillData);
     
     // 将 skillData 当作 ASCII 字符串（这是一个hex字符串）
     const hexString = byteArrayToString(skillData);
+
+    console.log('hexString', hexString);
     
     // 将 hex 字符串转换回密文
     const encryptedData = hexToBytes(hexString);
+
+    console.log('encryptedData', encryptedData);
     
     // 解密
     const decrypted = decryptWithECB(encryptedData);
+
+    console.log('decrypted', decrypted);
+
+    // const plainBytes = decryptWithECB(uint8, "gd secret key!!!");
+
+    // Reinterpret as signed
+    const signedPlain = new Int8Array(decrypted.buffer);
+    // signedPlain is an Int8Array of −128…127 :contentReference[oaicite:4]{index=4}
+
+    console.log( 'signedPlain', Array.from(signedPlain));
     
     // 转换为字符串
     const skillString = byteArrayToString(decrypted);
+
+    console.log('skillString', skillString);
     
     // 清理和解析JSON
     return parseSkillJSON(skillString);

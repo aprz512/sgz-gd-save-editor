@@ -75,6 +75,10 @@ class MainActivity : AppCompatActivity() {
         binding.viewPager2.isUserInputEnabled = false
     }
 
+    override fun onResume() {
+        super.onResume()
+        DiySkills.main(emptyArray())
+    }
 
 }
 
