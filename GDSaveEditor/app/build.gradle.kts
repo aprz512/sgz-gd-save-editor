@@ -7,6 +7,15 @@ android {
     namespace = "com.aprz.gdsaveeditor"
     compileSdk = 36
 
+    signingConfigs {
+        create("release") {
+            storeFile = file("../../key.jks")
+            storePassword = "sgzgd0"
+            keyAlias = "key0"
+            keyPassword = "sgzgd0"
+        }
+    }
+
     defaultConfig {
         applicationId = "com.aprz.gdsaveeditor"
         minSdk = 24
@@ -19,6 +28,7 @@ android {
 
     buildTypes {
         release {
+            signingConfig = signingConfigs.getByName("release")
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
