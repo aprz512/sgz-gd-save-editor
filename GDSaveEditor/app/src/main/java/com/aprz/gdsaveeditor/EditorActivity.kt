@@ -4,7 +4,6 @@ import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.os.ParcelFileDescriptor
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -20,9 +19,7 @@ import com.google.gson.JsonArray
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import java.io.BufferedReader
-import java.io.BufferedWriter
 import java.io.FileReader
-import java.io.FileWriter
 import kotlin.concurrent.thread
 
 class EditorActivity : AppCompatActivity() {
@@ -136,12 +133,14 @@ class EditorActivity : AppCompatActivity() {
         loading.show()
         thread {
             try {
-                val actors = json.get("actors")?.asJsonArray ?: JsonArray()
-                val skillActor = (0 until actors.size())
-                    .map { actors.get(it).asJsonObject }
-                    .find { it.has("diy_skills") }
-                if (skillActor != null) {
-                    skillActor.addProperty("diy_skills", DiySkills.getEncryptSkillString(skillFragment.getSkills()))
+                if (skillFragment.skillsLoaded) {
+                    val actors = json.get("actors")?.asJsonArray ?: JsonArray()
+                    val skillActor = (0 until actors.size())
+                        .map { actors.get(it).asJsonObject }
+                        .find { it.has("diy_skills") }
+                    if (skillActor != null) {
+                        skillActor.addProperty("diy_skills", DiySkills.getEncryptSkillString(skillFragment.getSkills()))
+                    }
                 }
 
                 settingsFragment.collectSettings()
@@ -170,10 +169,8 @@ class EditorActivity : AppCompatActivity() {
     }
 
     private fun patchSaveFile(fileUri: Uri, save: String) {
-        val pfd: ParcelFileDescriptor = contentResolver.openFileDescriptor(fileUri, "w") ?: return
-        pfd.use { pfd ->
-            val bw = BufferedWriter(FileWriter(pfd.fileDescriptor))
-            bw.use { bw -> bw.write(save) }
+        contentResolver.openOutputStream(fileUri)?.use { out ->
+            out.write(save.toByteArray(Charsets.UTF_8))
         }
     }
 

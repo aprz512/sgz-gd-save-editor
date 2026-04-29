@@ -129,13 +129,13 @@ class ActorListFragment : Fragment() {
             .setPositiveButton("保存") { _, _ ->
                 for ((key, edit) in inputs) {
                     val value = edit.text.toString().trim()
-                    if (value.isEmpty()) {
-                        actor.remove(key)
-                    } else if (key == "标签") {
-                        // 标签 must be JsonArray
+                    if (key == "标签") {
                         val arr = JsonArray()
                         value.split(",", "，").map { it.trim() }.filter { it.isNotEmpty() }.forEach { arr.add(it) }
                         actor.add(key, arr)
+                    } else if (value.isEmpty()) {
+                        // Preserve key with empty string, don't remove
+                        actor.addProperty(key, "")
                     } else {
                         val num = value.toIntOrNull()
                         if (num != null) actor.addProperty(key, num)

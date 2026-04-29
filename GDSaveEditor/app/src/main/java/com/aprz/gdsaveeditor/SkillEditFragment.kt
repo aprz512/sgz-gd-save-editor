@@ -11,6 +11,7 @@ import com.google.gson.JsonArray
 class SkillEditFragment : Fragment() {
 
     var actors: JsonArray? = null
+    var skillsLoaded = false
     private val skillEdits = mutableListOf<EditText>()
 
     fun getSkills(): Skills {
@@ -43,8 +44,9 @@ class SkillEditFragment : Fragment() {
             skillEdits.getOrNull(5)?.setText(skills.skill6)
             skillEdits.getOrNull(6)?.setText(skills.skill7)
             skillEdits.getOrNull(7)?.setText(skills.skill8)
+            skillsLoaded = true
         } catch (e: Exception) {
-            // ignore decrypt errors
+            skillsLoaded = false
         }
     }
 

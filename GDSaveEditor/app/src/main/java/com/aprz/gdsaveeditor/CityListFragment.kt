@@ -85,7 +85,7 @@ class CityListFragment : Fragment() {
             .setPositiveButton("保存") { _, _ ->
                 for ((key, edit) in inputs) {
                     val value = edit.text.toString().trim()
-                    if (value.isEmpty()) city.remove(key)
+                    if (value.isEmpty()) city.addProperty(key, "")
                     else {
                         val num = value.toIntOrNull()
                         if (num != null) city.addProperty(key, num)
