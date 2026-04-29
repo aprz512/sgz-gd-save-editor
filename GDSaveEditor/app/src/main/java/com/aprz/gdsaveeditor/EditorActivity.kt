@@ -4,6 +4,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.os.ParcelFileDescriptor
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -169,8 +170,12 @@ class EditorActivity : AppCompatActivity() {
     }
 
     private fun patchSaveFile(fileUri: Uri, save: String) {
-        contentResolver.openOutputStream(fileUri)?.use { out ->
-            out.write(save.toByteArray(Charsets.UTF_8))
+        val bytes = save.toByteArray(Charsets.UTF_8)
+        // 使用 "wt" 模式确保截断旧内容，再写入正确长度
+        contentResolver.openFileDescriptor(fileUri, "wt")?.use { pfd ->
+            java.io.FileOutputStream(pfd.fileDescriptor).use { fos ->
+                fos.write(bytes)
+            }
         }
     }
 

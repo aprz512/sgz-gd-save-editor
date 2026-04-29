@@ -738,8 +738,15 @@ function renderEquipTable(type) {
         return;
     }
 
+    // 检测格式：新存档只有 ID+数量, 旧存档有详细属性
+    const first = data[0];
+    const isNewFormat = Object.keys(first).length <= 2 && ('数量' in first);
+
     let columns, rows;
-    if (type === 'weapons') {
+    if (isNewFormat) {
+        columns = ['ID', '数量'];
+        rows = data.map(w => [w.ID, w.数量]);
+    } else if (type === 'weapons') {
         columns = ['ID', '名称', '品质', '类型', '持法', '攻击力', '防御力', '重量', '价格', '描述'];
         rows = data.map(w => [
             w.ID, w.名称, w.品质, w.类型, w.持法 || '', w.攻击力 ?? '', w.防御力 ?? '', w.重量 ?? '',
@@ -767,6 +774,6 @@ function renderEquipTable(type) {
 
     container.innerHTML = `<table class="data-table">
         <thead><tr>${columns.map(c => `<th>${c}</th>`).join('')}</tr></thead>
-        <tbody>${rows.map(r => `<tr>${r.map(c => `<td>${esc(String(c))}</td>`).join('')}</tr>`).join('')}</tbody>
+        <tbody>${rows.map(r => `<tr>${r.map(c => `<td>${esc(String(c ?? ''))}</td>`).join('')}</tr>`).join('')}</tbody>
     </table>`;
 }
