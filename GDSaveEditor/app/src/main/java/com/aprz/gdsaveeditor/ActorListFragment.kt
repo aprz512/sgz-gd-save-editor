@@ -98,7 +98,7 @@ class ActorListFragment : Fragment() {
             val label = TextView(requireContext()).apply {
                 text = key
                 width = 160
-                setTextColor(resources.getColor(android.R.color.primary_text_light, null))
+                setTextColor(resources.getColor(android.R.color.primary_text_dark, null))
             }
             row.addView(label)
             val edit = EditText(requireContext()).apply {

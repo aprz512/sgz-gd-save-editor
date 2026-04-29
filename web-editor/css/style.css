@@ -702,3 +702,27 @@ footer p {
     .panel-header { flex-direction: column; align-items: flex-start; }
     .save-bar { flex-direction: column; }
 }
+
+/* === Scrollbar === */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--bg-primary); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+/* === Selection === */
+::selection { background: var(--accent-red-dark); color: #fff; }
+
+/* === Table empty state === */
+.data-table tbody:empty::after {
+    content: '暂无数据';
+    display: block;
+    padding: 40px;
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 14px;
+}
+
+/* === Input number arrows === */
+input[type="number"] { -moz-appearance: textfield; }
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button { opacity: 1; }

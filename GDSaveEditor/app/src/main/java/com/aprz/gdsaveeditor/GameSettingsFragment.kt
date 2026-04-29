@@ -46,7 +46,7 @@ class GameSettingsFragment : Fragment() {
             }
             row.addView(TextView(requireContext()).apply {
                 text = label; width = 200
-                setTextColor(resources.getColor(android.R.color.primary_text_light, null))
+                setTextColor(resources.getColor(android.R.color.primary_text_dark, null))
             })
             val edit = EditText(requireContext()).apply {
                 if (type == "number") inputType = InputType.TYPE_CLASS_NUMBER
@@ -62,7 +62,7 @@ class GameSettingsFragment : Fragment() {
 
         val gsHeader = TextView(requireContext()).apply {
             text = "游戏规则"; textSize = 18f; setPadding(0, 24, 0, 8)
-            setTextColor(resources.getColor(android.R.color.primary_text_light, null))
+            setTextColor(resources.getColor(android.R.color.primary_text_dark, null))
         }
         layout.addView(gsHeader)
 
@@ -76,7 +76,7 @@ class GameSettingsFragment : Fragment() {
 
         val powerHeader = TextView(requireContext()).apply {
             text = "玩家"; textSize = 18f; setPadding(0, 24, 0, 8)
-            setTextColor(resources.getColor(android.R.color.primary_text_light, null))
+            setTextColor(resources.getColor(android.R.color.primary_text_dark, null))
         }
         layout.addView(powerHeader)
         addRow("战力值", "power")

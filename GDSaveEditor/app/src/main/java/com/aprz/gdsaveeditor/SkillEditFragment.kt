@@ -61,7 +61,7 @@ class SkillEditFragment : Fragment() {
         val title = android.widget.TextView(requireContext()).apply {
             text = "请输入技能名称："
             textSize = 24f
-            setTextColor(resources.getColor(android.R.color.primary_text_light, null))
+            setTextColor(resources.getColor(android.R.color.primary_text_dark, null))
             setPadding(0, 0, 0, 16)
         }
         linear.addView(title)
