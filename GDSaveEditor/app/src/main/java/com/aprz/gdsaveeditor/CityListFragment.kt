@@ -1,18 +1,16 @@
 package com.aprz.gdsaveeditor
 
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import android.os.Bundle
 import android.text.InputType
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.EditText
-import android.widget.LinearLayout
-import android.widget.TextView
+import android.widget.*
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.RecyclerView
 import com.aprz.gdsaveeditor.databinding.FragmentCityListBinding
 import com.aprz.gdsaveeditor.databinding.ItemCityBinding
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject
 
@@ -20,8 +18,17 @@ class CityListFragment : Fragment() {
 
     private var _binding: FragmentCityListBinding? = null
     private val binding get() = _binding!!
+    private lateinit var adapter: CityAdapter
 
     var citys: JsonArray? = null
+        set(value) {
+            field = value
+            if (::adapter.isInitialized && value != null) {
+                val list = (0 until value.size()).map { value.get(it).asJsonObject }
+                binding.tvCityCount.text = "${list.size}"
+                adapter.submitList(list)
+            }
+        }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentCityListBinding.inflate(inflater, container, false)
@@ -30,15 +37,9 @@ class CityListFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val adapter = CityAdapter { city -> showEditCityDialog(city) }
+        adapter = CityAdapter { showEditCityDialog(it) }
         binding.rvCities.adapter = adapter
-
-        val all = citys
-        if (all != null) {
-            val list = (0 until all.size()).map { all.get(it).asJsonObject }
-            binding.tvCityCount.text = "${list.size}"
-            adapter.submitList(list)
-        }
+        citys?.let { citys = it } // trigger setter
     }
 
     private fun showEditCityDialog(city: JsonObject) {
@@ -62,11 +63,10 @@ class CityListFragment : Fragment() {
                 orientation = LinearLayout.HORIZONTAL
                 setPadding(0, 8, 0, 8)
             }
-            val label = TextView(requireContext()).apply {
+            row.addView(TextView(requireContext()).apply {
                 text = key; width = 180
                 setTextColor(resources.getColor(android.R.color.primary_text_dark, null))
-            }
-            row.addView(label)
+            })
             val edit = EditText(requireContext()).apply {
                 setText(city.get(key)?.asString ?: "")
                 isEnabled = type != "readonly"
@@ -78,20 +78,21 @@ class CityListFragment : Fragment() {
             if (type != "readonly") inputs[key] = edit
         }
 
+        val sv = ScrollView(requireContext()).apply { addView(layout) }
         MaterialAlertDialogBuilder(requireContext())
             .setTitle("编辑城池 - ${city.get("城池名")?.asString ?: ""}")
-            .setView(layout)
+            .setView(sv)
             .setPositiveButton("保存") { _, _ ->
                 for ((key, edit) in inputs) {
                     val value = edit.text.toString().trim()
-                    if (value.isEmpty()) {
-                        city.remove(key)
-                    } else {
+                    if (value.isEmpty()) city.remove(key)
+                    else {
                         val num = value.toIntOrNull()
                         if (num != null) city.addProperty(key, num)
                         else city.addProperty(key, value)
                     }
                 }
+                adapter.notifyDataSetChanged()
             }
             .setNegativeButton("取消", null)
             .show()

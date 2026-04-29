@@ -15,7 +15,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
         android:layout_marginStart="16dp"
-        android:textColor="@color/black"
+        android:textColor="?attr/colorOnSurface"
 
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"

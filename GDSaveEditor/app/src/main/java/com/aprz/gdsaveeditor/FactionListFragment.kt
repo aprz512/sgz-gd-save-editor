@@ -5,12 +5,8 @@ import android.text.InputType
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.EditText
-import android.widget.LinearLayout
-import android.widget.ScrollView
-import android.widget.TextView
+import android.widget.*
 import androidx.fragment.app.Fragment
-import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject
@@ -21,31 +17,28 @@ class FactionListFragment : Fragment() {
     var actors: JsonArray? = null
     var citys: JsonArray? = null
 
+    private var rootView: View? = null
+    private var isViewReady = false
+
     private fun getActorName(id: Int): String {
-        if (actors == null) return "$id"
-        return (0 until actors!!.size()).map { actors!!.get(it).asJsonObject }
+        val a = actors ?: return "$id"
+        return (0 until a.size()).map { a.get(it).asJsonObject }
             .find { it.get("ID")?.asInt == id }?.get("姓名")?.asString ?: "$id"
     }
 
     private fun getCityName(id: Int): String {
-        if (citys == null) return "$id"
-        return (0 until citys!!.size()).map { citys!!.get(it).asJsonObject }
+        val c = citys ?: return "$id"
+        return (0 until c.size()).map { c.get(it).asJsonObject }
             .find { it.get("ID")?.asInt == id }?.get("城池名")?.asString ?: "$id"
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        val scroll = ScrollView(requireContext())
-        val layout = LinearLayout(requireContext()).apply {
-            orientation = LinearLayout.VERTICAL
-            setPadding(16, 16, 16, 16)
-        }
+    fun render() {
+        if (!isViewReady) return
+        val view = rootView as? ScrollView ?: return
+        val layout = view.getChildAt(0) as? LinearLayout ?: return
+        layout.removeAllViews()
 
-        val all = vstates
-        if (all == null) {
-            scroll.addView(layout)
-            return scroll
-        }
-
+        val all = vstates ?: return
         for (i in 0 until all.size()) {
             val v = all.get(i).asJsonObject
             val monarchId = v.get("君主")?.asInt ?: -1
@@ -65,8 +58,7 @@ class FactionListFragment : Fragment() {
                 setCardBackgroundColor(requireContext().getColor(android.R.color.transparent))
                 strokeWidth = 1
                 strokeColor = requireContext().getColor(android.R.color.darker_gray)
-                isClickable = true
-                isFocusable = true
+                isClickable = true; isFocusable = true
                 setOnClickListener { showEditDialog(v) }
             }
 
@@ -74,57 +66,51 @@ class FactionListFragment : Fragment() {
                 orientation = LinearLayout.VERTICAL
                 setPadding(16, 14, 16, 14)
             }
-
-            inner.addView(TextView(requireContext()).apply {
-                text = "势力 ${v.get("ID")?.asString} — $monarchName"
-                textSize = 16f
-                setTextColor(resources.getColor(android.R.color.primary_text_dark, null))
-            })
-            inner.addView(TextView(requireContext()).apply {
-                text = "目标: $targetCity  |  状态: $status"
-                textSize = 12f
-                setPadding(0, 4, 0, 0)
-                setTextColor(resources.getColor(android.R.color.secondary_text_dark, null))
-            })
-            inner.addView(TextView(requireContext()).apply {
-                text = "继承人: ${heirs.ifEmpty { "无" }}"
-                textSize = 12f
-                setPadding(0, 2, 0, 0)
-                setTextColor(resources.getColor(android.R.color.secondary_text_dark, null))
-            })
-            inner.addView(TextView(requireContext()).apply {
-                text = "友好: ${friends.ifEmpty { "无" }}"
-                textSize = 12f
-                setPadding(0, 2, 0, 0)
-                setTextColor(resources.getColor(android.R.color.secondary_text_dark, null))
-            })
-            inner.addView(TextView(requireContext()).apply {
-                text = "仇恨: ${enemies.ifEmpty { "无" }}"
-                textSize = 12f
-                setPadding(0, 2, 0, 0)
-                setTextColor(resources.getColor(android.R.color.secondary_text_dark, null))
-            })
+            fun tv(t: String, size: Float, top: Int = 0, color: Int = android.R.color.primary_text_dark) {
+                inner.addView(TextView(requireContext()).apply {
+                    text = t; textSize = size
+                    setPadding(0, top, 0, 0)
+                    setTextColor(resources.getColor(color, null))
+                })
+            }
+            tv("势力 ${v.get("ID")?.asString} — $monarchName", 16f)
+            tv("目标: $targetCity  |  状态: $status", 12f, 4, android.R.color.secondary_text_dark)
+            tv("继承人: ${heirs.ifEmpty { "无" }}", 12f, 2, android.R.color.secondary_text_dark)
+            tv("友好: ${friends.ifEmpty { "无" }}", 12f, 2, android.R.color.secondary_text_dark)
+            tv("仇恨: ${enemies.ifEmpty { "无" }}", 12f, 2, android.R.color.secondary_text_dark)
 
             card.addView(inner)
             layout.addView(card)
         }
+    }
 
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+        val scroll = ScrollView(requireContext())
+        val layout = LinearLayout(requireContext()).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(16, 16, 16, 16)
+        }
         scroll.addView(layout)
+        rootView = scroll
         return scroll
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        isViewReady = true
+        render()
     }
 
     private fun showEditDialog(v: JsonObject) {
         val fields = listOf("君主" to "number", "目标城池" to "number", "状态" to "text")
         val layout = LinearLayout(requireContext()).apply {
-            orientation = LinearLayout.VERTICAL
-            setPadding(48, 24, 48, 24)
+            orientation = LinearLayout.VERTICAL; setPadding(48, 24, 48, 24)
         }
         val inputs = mutableMapOf<String, EditText>()
 
         for ((key, type) in fields) {
             val row = LinearLayout(requireContext()).apply {
-                orientation = LinearLayout.HORIZONTAL
-                setPadding(0, 8, 0, 8)
+                orientation = LinearLayout.HORIZONTAL; setPadding(0, 8, 0, 8)
             }
             row.addView(TextView(requireContext()).apply {
                 text = key; width = 180
@@ -135,35 +121,28 @@ class FactionListFragment : Fragment() {
                 if (type == "number") inputType = InputType.TYPE_CLASS_NUMBER
                 layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
             }
-            row.addView(edit)
-            layout.addView(row)
-            inputs[key] = edit
+            row.addView(edit); layout.addView(row); inputs[key] = edit
         }
 
-        // Extra fields
-        for (label in listOf("友好势力" to "friends", "仇恨势力" to "enemies", "继承人" to "heirs")) {
+        for ((label, key) in listOf("友好势力" to "friends", "仇恨势力" to "enemies", "继承人" to "heirs")) {
             val row = LinearLayout(requireContext()).apply {
-                orientation = LinearLayout.HORIZONTAL
-                setPadding(0, 8, 0, 8)
+                orientation = LinearLayout.HORIZONTAL; setPadding(0, 8, 0, 8)
             }
             row.addView(TextView(requireContext()).apply {
-                text = label.first; width = 180
+                text = label; width = 180
                 setTextColor(resources.getColor(android.R.color.primary_text_dark, null))
             })
             val edit = EditText(requireContext()).apply {
-                setText(v.get(label.first)?.asJsonArray?.joinToString(",") { it.asString } ?: "")
+                setText(v.get(label)?.asJsonArray?.joinToString(",") { it.asString } ?: "")
                 layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
             }
-            row.addView(edit)
-            layout.addView(row)
-            inputs[label.second] = edit
+            row.addView(edit); layout.addView(row); inputs[key] = edit
         }
 
-        val scrollView = ScrollView(requireContext()).apply { addView(layout) }
-
+        val sv = ScrollView(requireContext()).apply { addView(layout) }
         MaterialAlertDialogBuilder(requireContext())
             .setTitle("编辑势力 ${v.get("ID")?.asString}")
-            .setView(scrollView)
+            .setView(sv)
             .setPositiveButton("保存") { _, _ ->
                 for ((key, edit) in inputs) {
                     when (key) {
@@ -173,11 +152,15 @@ class FactionListFragment : Fragment() {
                         else -> {
                             val value = edit.text.toString().trim()
                             if (value.isEmpty()) v.remove(key)
-                            else v.get(key)?.asInt?.let { v.addProperty(key, value.toIntOrNull() ?: return@let) }
-                                ?: v.addProperty(key, value)
+                            else {
+                                val num = value.toIntOrNull()
+                                if (num != null) v.addProperty(key, num)
+                                else v.addProperty(key, value)
+                            }
                         }
                     }
                 }
+                render()
             }
             .setNegativeButton("取消", null)
             .show()
