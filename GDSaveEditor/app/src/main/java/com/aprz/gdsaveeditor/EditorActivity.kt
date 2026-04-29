@@ -118,7 +118,7 @@ class EditorActivity : AppCompatActivity() {
                     equipFragment.steeds = json.get("steeds")?.asJsonArray
                     equipFragment.suits = json.get("suits")?.asJsonArray
                     equipFragment.jewelrys = json.get("jewelrys")?.asJsonArray
-                    equipFragment.render()
+                    equipFragment.refresh()
 
                     loading.dismiss()
                 }

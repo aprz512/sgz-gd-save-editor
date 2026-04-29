@@ -101,8 +101,14 @@ class ActorListFragment : Fragment() {
                 setTextColor(resources.getColor(android.R.color.primary_text_dark, null))
             }
             row.addView(label)
+            val rawVal = actor.get(key)
+            val displayVal = when {
+                rawVal == null -> ""
+                rawVal.isJsonArray -> rawVal.asJsonArray.joinToString(",") { it.asString }
+                else -> rawVal.asString
+            }
             val edit = EditText(requireContext()).apply {
-                setText(actor.get(key)?.asString ?: "")
+                setText(displayVal)
                 isEnabled = type != "readonly"
                 if (type == "number") inputType = InputType.TYPE_CLASS_NUMBER
                 layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
@@ -125,6 +131,11 @@ class ActorListFragment : Fragment() {
                     val value = edit.text.toString().trim()
                     if (value.isEmpty()) {
                         actor.remove(key)
+                    } else if (key == "标签") {
+                        // 标签 must be JsonArray
+                        val arr = JsonArray()
+                        value.split(",", "，").map { it.trim() }.filter { it.isNotEmpty() }.forEach { arr.add(it) }
+                        actor.add(key, arr)
                     } else {
                         val num = value.toIntOrNull()
                         if (num != null) actor.addProperty(key, num)

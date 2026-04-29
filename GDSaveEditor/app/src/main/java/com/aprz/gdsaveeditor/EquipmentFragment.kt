@@ -8,6 +8,7 @@ import android.widget.*
 import androidx.fragment.app.Fragment
 import com.google.android.material.tabs.TabLayout
 import com.google.gson.JsonArray
+import com.google.gson.JsonObject
 
 class EquipmentFragment : Fragment() {
 
@@ -16,58 +17,75 @@ class EquipmentFragment : Fragment() {
     var suits: JsonArray? = null
     var jewelrys: JsonArray? = null
 
-    private var rootView: View? = null
     private var tableContainer: LinearLayout? = null
-    private var isViewReady = false
+    private var currentType: String = "weapons"
+    private var viewReady = false
 
-    fun render(type: String = "weapons") {
-        if (!isViewReady) return
+    fun refresh() {
+        if (viewReady) render(currentType)
+    }
+
+    private fun render(type: String) {
+        currentType = type
         val container = tableContainer ?: return
         container.removeAllViews()
+
         val data = when (type) {
             "steeds" -> steeds; "suits" -> suits; "jewelrys" -> jewelrys; else -> weapons
-        } ?: return
+        }
+        if (data == null || data.size() == 0) {
+            container.addView(TextView(requireContext()).apply {
+                text = "暂无数据"
+                textSize = 14f
+                setPadding(16, 32, 16, 32)
+                setTextColor(resources.getColor(android.R.color.secondary_text_dark, null))
+            })
+            return
+        }
+
+        // Detect format: 4.sav has full detail, 2.sav has only ID+数量
+        val first = data.get(0).asJsonObject
+        val hasDetail = first.has("名称")
 
         val table = TableLayout(requireContext()).apply { isStretchAllColumns = true }
 
-        val headers = when (type) {
-            "weapons" -> listOf("ID", "名称", "品质", "类型", "攻击", "防御", "重量", "价格")
-            "steeds" -> listOf("ID", "名称", "品质", "马力", "机动恢复", "价格")
-            "suits" -> listOf("ID", "名称", "品质", "防御", "重量", "价格")
-            else -> listOf("ID", "名称", "品质", "类型", "射程", "价格")
-        }
-
-        table.addView(headerRow(headers))
-
-        for (i in 0 until data.size()) {
-            val item = data.get(i).asJsonObject
-            val cells = when (type) {
-                "weapons" -> listOf(
-                    item.get("ID")?.asString ?: "", item.get("名称")?.asString ?: "",
-                    item.get("品质")?.asString ?: "", item.get("类型")?.asString ?: "",
-                    item.get("攻击力")?.asString ?: "", item.get("防御力")?.asString ?: "",
-                    item.get("重量")?.asString ?: "", item.get("价格")?.asString ?: ""
-                )
-                "steeds" -> listOf(
-                    item.get("ID")?.asString ?: "", item.get("名称")?.asString ?: "",
-                    item.get("品质")?.asString ?: "", item.get("马力")?.asString ?: "",
-                    item.get("机动力恢复")?.asString ?: "", item.get("价格")?.asString ?: ""
-                )
-                "suits" -> listOf(
-                    item.get("ID")?.asString ?: "", item.get("名称")?.asString ?: "",
-                    item.get("品质")?.asString ?: "", item.get("防御力")?.asString ?: "",
-                    item.get("重量")?.asString ?: "", item.get("价格")?.asString ?: ""
-                )
-                else -> listOf(
-                    item.get("ID")?.asString ?: "", item.get("名称")?.asString ?: "",
-                    item.get("品质")?.asString ?: "", item.get("类型")?.asString ?: "",
-                    item.get("射程")?.asString ?: "", item.get("价格")?.asString ?: ""
-                )
+        if (hasDetail) {
+            val headers = when (type) {
+                "weapons" -> listOf("ID", "名称", "品质", "类型", "攻击", "防御", "重量", "价格")
+                "steeds" -> listOf("ID", "名称", "品质", "马力", "机动恢复", "价格")
+                "suits" -> listOf("ID", "名称", "品质", "防御", "重量", "价格")
+                else -> listOf("ID", "名称", "品质", "类型", "射程", "价格")
             }
-            table.addView(dataRow(cells))
+            table.addView(headerRow(headers))
+            for (i in 0 until data.size()) {
+                val item = data.get(i).asJsonObject
+                val cells = when (type) {
+                    "weapons" -> listOf(s(item, "ID"), s(item, "名称"), s(item, "品质"), s(item, "类型"),
+                        s(item, "攻击力"), s(item, "防御力"), s(item, "重量"), s(item, "价格"))
+                    "steeds" -> listOf(s(item, "ID"), s(item, "名称"), s(item, "品质"),
+                        s(item, "马力"), s(item, "机动力恢复"), s(item, "价格"))
+                    "suits" -> listOf(s(item, "ID"), s(item, "名称"), s(item, "品质"),
+                        s(item, "防御力"), s(item, "重量"), s(item, "价格"))
+                    else -> listOf(s(item, "ID"), s(item, "名称"), s(item, "品质"), s(item, "类型"),
+                        s(item, "射程"), s(item, "价格"))
+                }
+                table.addView(dataRow(cells))
+            }
+        } else {
+            // Minimal format (2.sav): just ID + 数量
+            table.addView(headerRow(listOf("ID", "数量")))
+            for (i in 0 until data.size()) {
+                val item = data.get(i).asJsonObject
+                table.addView(dataRow(listOf(s(item, "ID"), s(item, "数量"))))
+            }
         }
 
         container.addView(table)
+    }
+
+    private fun s(obj: JsonObject, key: String): String {
+        val el = obj.get(key) ?: return ""
+        return el.asJsonPrimitive.asString
     }
 
     private fun headerRow(headers: List<String>): TableRow {
@@ -113,13 +131,12 @@ class EquipmentFragment : Fragment() {
                 LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT
             )
         }
-        val container = LinearLayout(requireContext()).apply {
+        val inner = LinearLayout(requireContext()).apply {
             orientation = LinearLayout.VERTICAL; setPadding(8, 8, 8, 8)
         }
-        scroll.addView(container)
+        scroll.addView(inner)
         root.addView(scroll)
-        tableContainer = container
-        rootView = root
+        tableContainer = inner
 
         tabs.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
             override fun onTabSelected(tab: TabLayout.Tab?) {
@@ -137,7 +154,13 @@ class EquipmentFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        isViewReady = true
-        render("weapons")
+        viewReady = true
+        render(currentType)
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        viewReady = false
+        tableContainer = null
     }
 }
