@@ -1,8 +1,6 @@
 package com.aprz.gdsaveeditor
 
 import android.os.Bundle
-import android.text.Editable
-import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -59,12 +57,20 @@ class SkillEditFragment : Fragment() {
         }
 
         val title = android.widget.TextView(requireContext()).apply {
-            text = "请输入技能名称："
+            text = "自定义技能编辑"
             textSize = 24f
             setTextColor(resources.getColor(android.R.color.primary_text_dark, null))
-            setPadding(0, 0, 0, 16)
         }
         linear.addView(title)
+
+        val desc = android.widget.TextView(requireContext()).apply {
+            text = "此功能用于编辑自定义武将（diy_skills）的8个技能位。\n非自定义武将不包含此数据，修改无效。\n\n每个技能位可填写技能名称，留空表示不使用该技能位。"
+            textSize = 13f
+            setTextColor(resources.getColor(android.R.color.secondary_text_dark, null))
+            setPadding(0, 8, 0, 20)
+            setLineSpacing(0f, 1.3f)
+        }
+        linear.addView(desc)
 
         for (i in 1..8) {
             val inputLayout = com.google.android.material.textfield.TextInputLayout(requireContext()).apply {
@@ -72,7 +78,7 @@ class SkillEditFragment : Fragment() {
                 layoutParams = android.widget.LinearLayout.LayoutParams(
                     android.widget.LinearLayout.LayoutParams.MATCH_PARENT,
                     android.widget.LinearLayout.LayoutParams.WRAP_CONTENT
-                ).apply { topMargin = 12 }
+                ).apply { topMargin = 10 }
             }
             val edit = EditText(requireContext()).apply {
                 maxLines = 1

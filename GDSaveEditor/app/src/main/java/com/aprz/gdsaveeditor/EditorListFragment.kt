@@ -84,7 +84,7 @@ class EditorListFragment : Fragment() {
         binding.openDocumentTree.visibility = View.VISIBLE
         binding.srlPullToRefresh.visibility = View.INVISIBLE
 
-        binding.openDocumentTree.setOnClickListener {
+        binding.btnOpen.setOnClickListener {
             openDirectory()
         }
     }

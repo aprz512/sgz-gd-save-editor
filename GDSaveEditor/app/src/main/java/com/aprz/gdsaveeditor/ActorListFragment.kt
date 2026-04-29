@@ -1,6 +1,6 @@
 package com.aprz.gdsaveeditor
 
-import android.app.AlertDialog
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import android.os.Bundle
 import android.text.InputType
 import android.view.LayoutInflater
@@ -112,9 +112,14 @@ class ActorListFragment : Fragment() {
             if (type != "readonly") inputs[key] = edit
         }
 
-        AlertDialog.Builder(requireContext())
+        val scrollView = ScrollView(requireContext()).apply {
+            addView(layout)
+            isFillViewport = true
+        }
+
+        MaterialAlertDialogBuilder(requireContext())
             .setTitle("编辑武将 - ${actor.get("姓名")?.asString ?: ""}")
-            .setView(layout)
+            .setView(scrollView)
             .setPositiveButton("保存") { _, _ ->
                 for ((key, edit) in inputs) {
                     val value = edit.text.toString().trim()

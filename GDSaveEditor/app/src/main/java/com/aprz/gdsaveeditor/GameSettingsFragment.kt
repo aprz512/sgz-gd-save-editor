@@ -13,9 +13,16 @@ import com.google.gson.JsonObject
 class GameSettingsFragment : Fragment() {
 
     var saveData: JsonObject? = null
+    private var pendingData: JsonObject? = null
     private val inputMap = mutableMapOf<String, EditText>()
+    private var isViewCreated = false
 
     fun loadSettings(data: JsonObject) {
+        pendingData = data
+        if (isViewCreated) applySettings(data)
+    }
+
+    private fun applySettings(data: JsonObject) {
         saveData = data
         inputMap["year"]?.setText(data.get("year")?.asString ?: "189")
         inputMap["month"]?.setText(data.get("month")?.asString ?: "1")
@@ -30,6 +37,12 @@ class GameSettingsFragment : Fragment() {
             val p = players.get(0).asJsonObject
             inputMap["power"]?.setText(p.get("power_value")?.asString ?: "50")
         }
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        isViewCreated = true
+        pendingData?.let { applySettings(it) }
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
@@ -57,15 +70,17 @@ class GameSettingsFragment : Fragment() {
             inputMap[key] = edit
         }
 
+        fun addHeader(text: String) {
+            layout.addView(TextView(requireContext()).apply {
+                setText(text); textSize = 18f; setPadding(0, 24, 0, 8)
+                setTextColor(resources.getColor(android.R.color.primary_text_dark, null))
+            })
+        }
+
         addRow("年份", "year")
         addRow("月份", "month")
 
-        val gsHeader = TextView(requireContext()).apply {
-            text = "游戏规则"; textSize = 18f; setPadding(0, 24, 0, 8)
-            setTextColor(resources.getColor(android.R.color.primary_text_dark, null))
-        }
-        layout.addView(gsHeader)
-
+        addHeader("游戏规则")
         addRow("人物大限", "gs_人物大限", "text")
         addRow("出仕地点", "gs_出仕地点", "text")
         addRow("出仕时间", "gs_出仕时间", "text")
@@ -74,11 +89,7 @@ class GameSettingsFragment : Fragment() {
         addRow("自动复活", "gs_自动复活", "text")
         addRow("武将成长", "gs_武将成长", "text")
 
-        val powerHeader = TextView(requireContext()).apply {
-            text = "玩家"; textSize = 18f; setPadding(0, 24, 0, 8)
-            setTextColor(resources.getColor(android.R.color.primary_text_dark, null))
-        }
-        layout.addView(powerHeader)
+        addHeader("玩家")
         addRow("战力值", "power")
 
         scroll.addView(layout)

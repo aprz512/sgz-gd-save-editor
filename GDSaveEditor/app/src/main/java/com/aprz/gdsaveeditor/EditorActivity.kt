@@ -33,8 +33,10 @@ class EditorActivity : AppCompatActivity() {
 
     private lateinit var actorFragment: ActorListFragment
     private lateinit var cityFragment: CityListFragment
+    private lateinit var factionFragment: FactionListFragment
     private lateinit var skillFragment: SkillEditFragment
     private lateinit var settingsFragment: GameSettingsFragment
+    private lateinit var equipFragment: EquipmentFragment
 
     private var jsonObject: JsonObject? = null
 
@@ -55,13 +57,16 @@ class EditorActivity : AppCompatActivity() {
 
         actorFragment = ActorListFragment()
         cityFragment = CityListFragment()
+        factionFragment = FactionListFragment()
         skillFragment = SkillEditFragment()
         settingsFragment = GameSettingsFragment()
+        equipFragment = EquipmentFragment()
 
         binding.viewPager.adapter = EditorPagerAdapter(supportFragmentManager, lifecycle,
-            listOf(actorFragment, cityFragment, skillFragment, settingsFragment))
+            listOf(actorFragment, cityFragment, factionFragment, skillFragment, settingsFragment, equipFragment))
+        binding.viewPager.offscreenPageLimit = 2
 
-        val tabTitles = listOf("武将", "城池", "技能", "设置")
+        val tabTitles = listOf("武将", "城池", "势力", "技能", "设置", "装备")
         tabTitles.forEach { binding.tabLayout.addTab(binding.tabLayout.newTab().setText(it)) }
 
         binding.tabLayout.addOnTabSelectedListener(object : com.google.android.material.tabs.TabLayout.OnTabSelectedListener {
@@ -92,16 +97,26 @@ class EditorActivity : AppCompatActivity() {
                 Handler(Looper.getMainLooper()).post {
                     val actors = json.get("actors")?.asJsonArray ?: JsonArray()
                     val citys = json.get("citys")?.asJsonArray ?: JsonArray()
+                    val vstates = json.get("vstates")?.asJsonArray ?: JsonArray()
 
                     actorFragment.actors = actors
                     actorFragment.filterActors()
 
                     cityFragment.citys = citys
 
+                    factionFragment.vstates = vstates
+                    factionFragment.actors = actors
+                    factionFragment.citys = citys
+
                     skillFragment.actors = actors
                     skillFragment.loadSkills()
 
                     settingsFragment.loadSettings(json)
+
+                    equipFragment.weapons = json.get("weapons")?.asJsonArray
+                    equipFragment.steeds = json.get("steeds")?.asJsonArray
+                    equipFragment.suits = json.get("suits")?.asJsonArray
+                    equipFragment.jewelrys = json.get("jewelrys")?.asJsonArray
 
                     loading.dismiss()
                 }
@@ -119,17 +134,14 @@ class EditorActivity : AppCompatActivity() {
         loading.show()
         thread {
             try {
-                // Save skills
                 val actors = json.get("actors")?.asJsonArray ?: JsonArray()
                 val skillActor = (0 until actors.size())
                     .map { actors.get(it).asJsonObject }
                     .find { it.has("diy_skills") }
                 if (skillActor != null) {
-                    val skills = skillFragment.getSkills()
-                    skillActor.addProperty("diy_skills", DiySkills.getEncryptSkillString(skills))
+                    skillActor.addProperty("diy_skills", DiySkills.getEncryptSkillString(skillFragment.getSkills()))
                 }
 
-                // Collect settings
                 settingsFragment.collectSettings()
 
                 patchSaveFile(fileUri, json.toString())

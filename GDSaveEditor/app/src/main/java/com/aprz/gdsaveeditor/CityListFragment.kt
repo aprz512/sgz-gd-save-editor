@@ -1,6 +1,6 @@
 package com.aprz.gdsaveeditor
 
-import android.app.AlertDialog
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import android.os.Bundle
 import android.text.InputType
 import android.view.LayoutInflater
@@ -78,7 +78,7 @@ class CityListFragment : Fragment() {
             if (type != "readonly") inputs[key] = edit
         }
 
-        AlertDialog.Builder(requireContext())
+        MaterialAlertDialogBuilder(requireContext())
             .setTitle("编辑城池 - ${city.get("城池名")?.asString ?: ""}")
             .setView(layout)
             .setPositiveButton("保存") { _, _ ->
