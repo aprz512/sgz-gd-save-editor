@@ -5,14 +5,14 @@ plugins {
 
 android {
     namespace = "com.aprz.gdsaveeditor"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.aprz.gdsaveeditor"
         minSdk = 24
-        targetSdk = 35
-        versionCode = 104
-        versionName = "1.0.4.20250415"
+        targetSdk = 36
+        versionCode = 105
+        versionName = "1.0.5.20260429"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -27,11 +27,11 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "17"
     }
     buildFeatures {
         viewBinding = true
@@ -53,5 +53,6 @@ dependencies {
     implementation(libs.androidx.swiperefreshlayout)
     implementation(libs.gson)
     implementation(libs.androidx.core.splashscreen)
+    implementation(libs.androidx.documentfile)
 
 }

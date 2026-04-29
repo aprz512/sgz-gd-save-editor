@@ -5,82 +5,231 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>三国志·霸王的大陆GD 存档编辑器</title>
     <link rel="stylesheet" href="css/style.css">
-    <!-- 引入CryptoJS库 -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/aes.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/pad-zeropadding.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/mode-ecb.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/forge/1.3.1/forge.min.js"></script>
-
-
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>三国志·霸王的大陆GD 存档编辑器</h1>
+    <div class="app">
+        <header class="app-header">
+            <h1>三国志·霸王的大陆<span class="accent">GD</span></h1>
+            <p class="subtitle">存档编辑器</p>
         </header>
-        
-        <main>
-            <div class="file-upload">
-                <h2>上传存档文件</h2>
-                <input type="file" id="save-file" accept=".sav" style="display: none;">
-                <button id="load-file">加载文件</button>
+
+        <main class="app-main">
+            <!-- File Upload -->
+            <section class="upload-section" id="upload-section">
+                <div class="upload-card">
+                    <div class="upload-icon">📂</div>
+                    <h2>加载存档文件</h2>
+                    <p>支持 .sav 和 .json 格式</p>
+                    <input type="file" id="save-file" accept=".sav,.json" style="display:none">
+                    <button id="load-file" class="btn btn-primary btn-lg">选择存档文件</button>
+                </div>
+            </section>
+
+            <!-- Editor -->
+            <div id="editor" style="display:none">
+                <!-- Tab Navigation -->
+                <nav class="tab-nav">
+                    <button class="tab-btn active" data-tab="actors">武将编辑</button>
+                    <button class="tab-btn" data-tab="skills">技能编辑</button>
+                    <button class="tab-btn" data-tab="cities">城池编辑</button>
+                    <button class="tab-btn" data-tab="factions">势力编辑</button>
+                    <button class="tab-btn" data-tab="settings">游戏设置</button>
+                    <button class="tab-btn" data-tab="equipment">装备参考</button>
+                </nav>
+
+                <!-- Tab: Actors -->
+                <section class="tab-panel active" id="tab-actors">
+                    <div class="panel-header">
+                        <h3>武将列表 <span class="count" id="actor-count">0</span></h3>
+                        <div class="panel-toolbar">
+                            <input type="text" id="actor-search" class="search-input" placeholder="搜索姓名、字...">
+                            <select id="actor-status-filter" class="filter-select">
+                                <option value="">全部状态</option>
+                                <option value="在野">在野</option>
+                                <option value="出仕">出仕</option>
+                                <option value="死亡">死亡</option>
+                            </select>
+                            <select id="actor-faction-filter" class="filter-select">
+                                <option value="">全部势力</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="table-wrap">
+                        <table class="data-table" id="actor-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th><th>姓名</th><th>字</th><th>性别</th><th>体</th><th>武</th><th>知</th><th>政</th>
+                                    <th>统</th><th>德</th><th>忠</th><th>胆</th><th>等级</th><th>经验</th><th>兵力</th>
+                                    <th>军种</th><th>状态</th><th>所在城</th><th>武器</th><th>防具</th><th>道具</th><th>坐骑</th>
+                                </tr>
+                            </thead>
+                            <tbody id="actor-tbody"></tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- Tab: Skills -->
+                <section class="tab-panel" id="tab-skills">
+                    <div class="panel-header">
+                        <h3>自定义技能编辑</h3>
+                    </div>
+                    <div class="skills-grid">
+                        <div class="skill-card" data-slot="1">
+                            <div class="skill-slot">技能 1</div>
+                            <input type="text" id="skill1" class="skill-input" placeholder="输入技能名称">
+                        </div>
+                        <div class="skill-card" data-slot="2">
+                            <div class="skill-slot">技能 2</div>
+                            <input type="text" id="skill2" class="skill-input" placeholder="输入技能名称">
+                        </div>
+                        <div class="skill-card" data-slot="3">
+                            <div class="skill-slot">技能 3</div>
+                            <input type="text" id="skill3" class="skill-input" placeholder="输入技能名称">
+                        </div>
+                        <div class="skill-card" data-slot="4">
+                            <div class="skill-slot">技能 4</div>
+                            <input type="text" id="skill4" class="skill-input" placeholder="输入技能名称">
+                        </div>
+                        <div class="skill-card" data-slot="5">
+                            <div class="skill-slot">技能 5</div>
+                            <input type="text" id="skill5" class="skill-input" placeholder="输入技能名称">
+                        </div>
+                        <div class="skill-card" data-slot="6">
+                            <div class="skill-slot">技能 6</div>
+                            <input type="text" id="skill6" class="skill-input" placeholder="输入技能名称">
+                        </div>
+                        <div class="skill-card" data-slot="7">
+                            <div class="skill-slot">技能 7</div>
+                            <input type="text" id="skill7" class="skill-input" placeholder="输入技能名称">
+                        </div>
+                        <div class="skill-card" data-slot="8">
+                            <div class="skill-slot">技能 8</div>
+                            <input type="text" id="skill8" class="skill-input" placeholder="输入技能名称">
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Tab: Cities -->
+                <section class="tab-panel" id="tab-cities">
+                    <div class="panel-header">
+                        <h3>城池列表 <span class="count" id="city-count">0</span></h3>
+                    </div>
+                    <div class="table-wrap">
+                        <table class="data-table" id="city-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th><th>城池名</th><th>行政区</th><th>地域</th><th>归属</th><th>金</th><th>米</th>
+                                    <th>人口</th><th>土地</th><th>产业</th><th>统治度</th><th>后备兵</th><th>防灾</th>
+                                    <th>买米价</th><th>卖米价</th><th>旱灾</th><th>洪涝</th>
+                                </tr>
+                            </thead>
+                            <tbody id="city-tbody"></tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- Tab: Factions -->
+                <section class="tab-panel" id="tab-factions">
+                    <div class="panel-header">
+                        <h3>势力列表 <span class="count" id="faction-count">0</span></h3>
+                    </div>
+                    <div class="table-wrap">
+                        <table class="data-table" id="faction-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th><th>君主</th><th>目标城池</th><th>继承人</th><th>友好势力</th><th>仇恨势力</th><th>状态</th>
+                                </tr>
+                            </thead>
+                            <tbody id="faction-tbody"></tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- Tab: Settings -->
+                <section class="tab-panel" id="tab-settings">
+                    <div class="panel-header">
+                        <h3>游戏设置</h3>
+                    </div>
+                    <div class="settings-grid">
+                        <div class="setting-group">
+                            <h4>基础信息</h4>
+                            <div class="form-row">
+                                <label>年份</label>
+                                <input type="number" id="set-year" min="180" max="300">
+                            </div>
+                            <div class="form-row">
+                                <label>月份</label>
+                                <input type="number" id="set-month" min="1" max="12">
+                            </div>
+                            <div class="form-row">
+                                <label>存档时间</label>
+                                <input type="text" id="set-savetime" readonly>
+                            </div>
+                            <div class="form-row">
+                                <label>玩家战力值</label>
+                                <input type="number" id="set-power" min="0" max="999">
+                            </div>
+                        </div>
+                        <div class="setting-group">
+                            <h4>游戏规则</h4>
+                            <div class="form-row" id="game-set-container"></div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Tab: Equipment Reference -->
+                <section class="tab-panel" id="tab-equipment">
+                    <div class="panel-header">
+                        <h3>装备参考表</h3>
+                    </div>
+                    <div class="equip-tabs">
+                        <button class="equip-tab active" data-equip="weapons">武器</button>
+                        <button class="equip-tab" data-equip="steeds">坐骑</button>
+                        <button class="equip-tab" data-equip="suits">防具</button>
+                        <button class="equip-tab" data-equip="jewelrys">道具</button>
+                    </div>
+                    <div class="table-wrap" id="equip-table-container"></div>
+                </section>
+
+                <!-- Save Button -->
+                <div class="save-bar">
+                    <button id="save-changes" class="btn btn-primary btn-lg">保存修改并下载</button>
+                    <span class="save-info" id="save-info"></span>
+                </div>
             </div>
-            
-            <div id="editor" style="display: none;">
-                <h2>编辑技能</h2>
-                <div class="skills-container">
-                    <div class="skill-input">
-                        <label for="skill1">技能1：</label>
-                        <input type="text" id="skill1" placeholder="输入技能名称">
+
+            <!-- Actor Edit Modal -->
+            <div class="modal-overlay" id="actor-modal" style="display:none">
+                <div class="modal">
+                    <div class="modal-header">
+                        <h3 id="modal-title">编辑武将</h3>
+                        <button class="modal-close" id="modal-close">&times;</button>
                     </div>
-                    <div class="skill-input">
-                        <label for="skill2">技能2：</label>
-                        <input type="text" id="skill2" placeholder="输入技能名称">
-                    </div>
-                    <div class="skill-input">
-                        <label for="skill3">技能3：</label>
-                        <input type="text" id="skill3" placeholder="输入技能名称">
-                    </div>
-                    <div class="skill-input">
-                        <label for="skill4">技能4：</label>
-                        <input type="text" id="skill4" placeholder="输入技能名称">
-                    </div>
-                    <div class="skill-input">
-                        <label for="skill5">技能5：</label>
-                        <input ty三国志·战略版pe="text" id="skill5" placeholder="输入技能名称">
-                    </div>
-                    <div class="skill-input">
-                        <label for="skill6">技能6：</label>
-                        <input type="text" id="skill6" placeholder="输入技能名称">
-                    </div>
-                    <div class="skill-input">
-                        <label for="skill7">技能7：</label>
-                        <input type="text" id="skill7" placeholder="输入技能名称">
-                    </div>
-                    <div class="skill-input">
-                        <label for="skill8">技能8：</label>
-                        <input type="text" id="skill8" placeholder="输入技能名称">
+                    <div class="modal-body" id="modal-body"></div>
+                    <div class="modal-footer">
+                        <button class="btn btn-secondary" id="modal-cancel">取消</button>
+                        <button class="btn btn-primary" id="modal-save">保存</button>
                     </div>
                 </div>
-                
-                <div class="actions">
-                    <button id="save-changes">保存修改</button>
-                </div>
             </div>
-            
-            <div id="loading" style="display: none;">
+
+            <!-- Loading -->
+            <div id="loading" style="display:none">
                 <div class="spinner"></div>
                 <p>正在处理...</p>
             </div>
         </main>
-        
+
         <footer>
             <p>本工具仅供学习交流使用，请勿用于非法用途</p>
         </footer>
     </div>
-    
-    <!-- 加载合并后的JavaScript文件 -->
+
     <script src="js/combined.js"></script>
 </body>
-</html> 
+</html>

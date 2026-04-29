@@ -2,4 +2,23 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+
+    <!-- 三国 Theme Colors -->
+    <color name="primary">#FF8B1A1A</color>
+    <color name="on_primary">#FFFFFFFF</color>
+    <color name="primary_container">#FFC43A3A</color>
+    <color name="on_primary_container">#FFFFFFFF</color>
+    <color name="secondary">#FFC9A96E</color>
+    <color name="on_secondary">#FF1A1A24</color>
+    <color name="secondary_container">#FFE0C88E</color>
+    <color name="on_secondary_container">#FF1A1A24</color>
+    <color name="background">#FF1A1A24</color>
+    <color name="on_background">#FFE8E4DC</color>
+    <color name="surface">#FF22222E</color>
+    <color name="on_surface">#FFE8E4DC</color>
+    <color name="surface_variant">#FF282836</color>
+    <color name="on_surface_variant">#FFA8A4B0</color>
+    <color name="outline">#FF3A3A52</color>
+    <color name="error">#FFE05555</color>
+    <color name="on_error">#FF1A1A24</color>
 </resources>
