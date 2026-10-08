@@ -33,6 +33,7 @@
         </activity>
         <activity android:name="com.aprz.gdsaveeditor.MainActivity" />
         <activity android:name="com.aprz.gdsaveeditor.EditorActivity" />
+        <activity android:name="com.aprz.gdsaveeditor.PlayIntegrityActivity" />
     </application>
 
 </manifest>

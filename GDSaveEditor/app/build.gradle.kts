@@ -5,7 +5,7 @@ plugins {
 
 android {
     namespace = "com.aprz.gdsaveeditor"
-    compileSdk = 36
+    compileSdk = 37
 
     signingConfigs {
         create("release") {
@@ -19,9 +19,9 @@ android {
     defaultConfig {
         applicationId = "com.aprz.gdsaveeditor"
         minSdk = 24
-        targetSdk = 36
-        versionCode = 105
-        versionName = "1.0.5.20260429"
+        targetSdk = 37
+        versionCode = 106
+        versionName = "1.0.6.20261008"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -64,5 +64,6 @@ dependencies {
     implementation(libs.gson)
     implementation(libs.androidx.core.splashscreen)
     implementation(libs.androidx.documentfile)
+    implementation(libs.play.integrity)
 
 }

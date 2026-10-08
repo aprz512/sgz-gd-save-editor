@@ -38,6 +38,10 @@ class SettingsFragment : Fragment() {
             val uri = Uri.parse("https://github.com/aprz512/sgz-gd-save-editor")
             startActivity(Intent(Intent.ACTION_VIEW, uri))
         }
+
+        binding.btnPlayIntegrity.setOnClickListener {
+            startActivity(Intent(requireContext(), PlayIntegrityActivity::class.java))
+        }
     }
 
     override fun onDestroyView() {
