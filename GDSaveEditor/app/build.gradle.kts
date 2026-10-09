@@ -20,8 +20,8 @@ android {
         applicationId = "com.aprz.gdsaveeditor"
         minSdk = 24
         targetSdk = 37
-        versionCode = 106
-        versionName = "1.0.6.20261008"
+        versionCode = 107
+        versionName = "1.0.7.20261009"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -29,7 +29,8 @@ android {
     buildTypes {
         release {
             signingConfig = signingConfigs.getByName("release")
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
